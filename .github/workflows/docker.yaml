@@ -5,9 +5,9 @@ name: Docker build
     pull_request:
     push:
         branches:
-          - master
-          - develop
-          - feature/**
+          - main
+          - dev
+          - feat/**
 
 env:
     CMAKE_OPTIONS: -DUserverGrpc_VERSION=1.51.0
