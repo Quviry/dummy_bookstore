@@ -1,0 +1,1 @@
+INSERT INTO TABLE bookshop.books VALUES (123, 234)
