@@ -82,7 +82,7 @@ format:
 # Internal hidden targets that are used only in docker environment
 --in-docker-start-debug --in-docker-start-release: --in-docker-start-%: install-%
 	@sed -i 's/config_vars.yaml/config_vars.docker.yaml/g' /home/user/.local/etc/dummy_bookstore/static_config.yaml
-	@psql 'postgresql://user:password@service-postgres:5432/dummy_bookstore_db-1' -f ./postgresql/data/initial_data.sql
+	@psql 'postgresql://user:password@service-postgres:5432/dummy_bookstore_db' -f ./postgresql/data/initial_data.sql
 	@/home/user/.local/bin/dummy_bookstore \
 		--config /home/user/.local/etc/dummy_bookstore/static_config.yaml
 

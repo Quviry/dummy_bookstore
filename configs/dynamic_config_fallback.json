@@ -40,7 +40,7 @@
   },
   "POSTGRES_CONNECTION_PIPELINE_ENABLED": false,
   "POSTGRES_CONNECTION_POOL_SETTINGS": {
-    "postgres-db-1": {
+    "postgres-db": {
       "max_pool_size": 15,
       "max_queue_size": 200,
       "min_pool_size": 8
@@ -62,8 +62,21 @@
   "POSTGRES_CONNECTION_SETTINGS": {},
   "POSTGRES_CONNLIMIT_MODE_AUTO_ENABLED": false,
   "POSTGRES_STATEMENT_METRICS_SETTINGS": {
-    "postgres-db-1": {
+    "postgres-db": {
       "max_statement_metrics": 5
     }
+  },
+  "USERVER_FILES_CONTENT_TYPE_MAP": {
+    ".css": "text/css",
+    ".gif": "image/gif",
+    ".htm": "text/html",
+    ".html": "text/html",
+    ".jpeg": "image/jpeg",
+    ".js": "application/javascript",
+    ".json": "application/json",
+    ".md": "text/markdown",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    "__default__": "text/plain"
   }
 }

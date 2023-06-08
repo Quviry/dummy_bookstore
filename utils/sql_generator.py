@@ -40,7 +40,7 @@ def to_raw_sql(lines: List[str]) -> Tuple[str, str]:
 def to_statement(path: pathlib.Path):
     name = path.name[:-4]
     query_bracket_name = '{"' + name + '"}'
-    query_name = f'storages::postgres::Query::Name{ query_bracket_name }'
+    query_name = f'userver::storages::postgres::Query::Name{ query_bracket_name }'
     constant_name = to_constant_name(name)
     with open(path, 'r') as file:
         content, comment = to_raw_sql(file.readlines())

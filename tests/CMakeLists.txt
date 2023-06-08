@@ -7,6 +7,8 @@ else()
     set(PYTEST_ARGS_CONFIG_VARS "")
 endif()
 
+message(TRACE ${CMAKE_CURRENT_SOURCE_DIR})
+
 userver_testsuite_add(
   SERVICE_TARGET dummy_bookstore
   REQUIREMENTS ${CMAKE_CURRENT_SOURCE_DIR}/requirements.txt
