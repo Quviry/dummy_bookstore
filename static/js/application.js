@@ -10,40 +10,191 @@ function curry(func) {
   };
 }
 
+const EntityListTemplate = {
+  'code': 'Ok',
+  'data': [
+    {'id': 'e3e70682-c209-4cac-a29f-6fbed82c07cd', 'title': 'David Dixon'},
+    {'id': 'd3fbf47a-7e5b-4e7f-9ca5-499d004ae545', 'title': 'Sarah Jacobson'},
+    {'id': 'f6be1f72-3405-495c-8a50-06c1ec188efb', 'title': 'Kimberly Roberts'},
+  ]
+};
+
+
+const SchemaTempate = {
+  'title': 'Test bookstore',
+  'tables': [
+    {
+      'title': 'First table',
+      'entity': true,
+      'columns': [],
+    },
+    {
+      'title': 'Second table',
+      'entity': true,
+      'columns': [],
+    },
+    {
+      'title': 'Connection table',
+      'entity': false,
+      'columns': [],
+    },
+    {
+      'title': 'Third table',
+      'entity': true,
+      'columns': [],
+    },
+
+  ],
+  'scripts': [
+    {
+      'title': 'All books',
+      'description': 'Get all books from schema',
+      'code': 'SELECT title FROM books'
+    },
+    {
+      'title': 'Sell all',
+      'description': 'Remove all data for sale',
+      'code': 'DELETE * FROM sales'
+    }
+  ]
+};
+
+const StandartWidth = ['col-8', 'mx-auto']; 
+
 
 function createTopBar() {
   let bar = document.createElement('div');
+  bar.classList.add('text-start', ...StandartWidth);
 
   let home_button = document.createElement('button');
-  home_button.classList.add('btn');
+  home_button.classList.add('btn', 'btn-secondary', 'py-0', 'px-2');
   home_button.onclick = function() {
     (new Application()).render_schema();
   };
-  home_button.textContent = 'Home';
+  home_button.textContent = '⌂ Home';
   bar.appendChild(home_button);
   return bar;
 }
 
-function createEntitySection(entity){
-    let container = document.createElement("div");
-    return container;
+async function getEntityList(entity, page) {
+  let response = await fetch(
+      `api/entity/${entity}?` + new URLSearchParams({'page': page}));
+  if (response.ok) {
+    let json = await response.json();
+    if (json.code != 'Ok') {
+      new Application().render_error(json.code || 'Uncaught');
+      return EntityListTemplate;
+    } else {
+      return json;
+    }
+  } else {
+    new Application().render_error(response.error || 'Uncaught');
+    return EntityListTemplate;
+  }
 }
 
-function createEntitySpace(schema, entity_title) {
+
+function createEntityListContainer(data) {
+  let container = document.createElement('tr');
+
+  let id_container = document.createElement('td');
+  id_container.textContent = data.id;
+  let human_readable_container = document.createElement('td');
+  human_readable_container.textContent = data?.title || data?.name;
+  let actions_container = document.createElement('td');
+  actions_container.classList.add('text-end');
+
+  let edit_button = document.createElement('button');
+  edit_button.classList.add('btn', 'btn-secondary', 'btn-sm', 'ms-4');
+  edit_button.textContent = 'Edit';
+
+  let delete_button = document.createElement('button');
+  delete_button.classList.add('btn', 'btn-danger', 'btn-sm', 'ms-4');
+  delete_button.textContent = 'Delete';
+
+  delete_button.onclick = (event) => {
+    event.stopPropagation();
+    alert('wannadelete');
+  };
+
+  actions_container.appendChild(edit_button);
+  actions_container.appendChild(delete_button);
+
+  container.appendChild(id_container);
+  container.appendChild(human_readable_container);
+  container.appendChild(actions_container);
+
+  container.onclick = () => {
+    alert(data.id);
+  };
+
+
+  return container;
+}
+
+async function createEntitySection(entity, page = 0) {
+  let container = document.createElement('div');
+  container.classList.add(...StandartWidth);
+
+  let data = await getEntityList(entity, page);
+
+  let table = document.createElement('table');
+  table.classList.add('table', 'table-hover', 'align-middle');
+
+  let thead = document.createElement('thead');
+
+  let tr_h = document.createElement('tr');
+  let id_h = document.createElement('th');
+  id_h.textContent = 'id';
+  id_h.classList.add('w-25');
+  let hr_h = document.createElement('th');
+  hr_h.textContent = 'human-readabale';
+  let ac_h = document.createElement('th');
+  ac_h.textContent = 'actions';
+  ac_h.classList.add('me-4', 'text-end');
+  tr_h.appendChild(id_h);
+  tr_h.appendChild(hr_h);
+  tr_h.appendChild(ac_h);
+  thead.appendChild(tr_h);
+  table.appendChild(thead);
+
+  let tbody = document.createElement('tbody');
+  for (const item of data.data) {
+    tbody.appendChild(createEntityListContainer(item));
+  }
+  table.appendChild(tbody);
+  container.appendChild(table);
+
+  return container;
+}
+
+async function createEntitySpace(schema, entity_title) {
+  for (let entity of schema.tables) {
+    if (entity.title == entity_title) {
+      var entity_data = entity;
+    }
+  }
+
   let container = document.createElement('div');
 
   let top_bar = createTopBar();
   container.appendChild(top_bar);
 
-  let entity_name = document.createElement("h2");
-  entity_name.textContent = entity_title;
+  let entity_name = document.createElement('h2');
+  entity_name.textContent =
+      entity_title.charAt(0).toUpperCase() + entity_title.slice(1);
+  entity_name.classList.add('my-3');
   container.appendChild(entity_name);
 
-  for(let entity of schema.tables){
-    if(entity.title == entity_title){
-        let entity_section = createEntitySection(entity);
-    }
-  }
+  let entity_counter = document.createElement('h6');
+  entity_counter.classList.add('text-end',  ...StandartWidth);
+  entity_counter.textContent = 'Rows number: ' + entity_data.rows_number;
+  container.appendChild(entity_counter);
+
+
+  var entity_section = await createEntitySection(entity_title);
+
+  container.appendChild(entity_section);
 
   return container;
 }
@@ -74,7 +225,9 @@ function createSection(title, elementGenerator, list) {
 
   let _list = document.createElement('div');
   _list.classList.add(
-      'list-group', 'list-group-flush', );
+      'list-group',
+      'list-group-flush',
+  );
 
   for (let item of list) {
     let generated_item = elementGenerator(item);
@@ -135,6 +288,7 @@ class Application {
     }
     Application._instance = this;
 
+    document.body.style.fontFamily = 'monospace';
     this.frame = document.getElementById('main');
     this.toaster = document.getElementById('toaster');
     this.prev_state = [];
@@ -150,44 +304,7 @@ class Application {
         .then(data => {this.schema = data})
         .catch(error => {
           this.render_error(error);
-          this.schema = {
-            'title': 'Test bookstore',
-            'tables': [
-              {
-                'title': 'First table',
-                'entity': true,
-                'columns': [],
-              },
-              {
-                'title': 'Second table',
-                'entity': true,
-                'columns': [],
-              },
-              {
-                'title': 'Connection table',
-                'entity': false,
-                'columns': [],
-              },
-              {
-                'title': 'Third table',
-                'entity': true,
-                'columns': [],
-              },
-
-            ],
-            'scripts': [
-              {
-                'title': 'All books',
-                'description': 'Get all books from schema',
-                'code': 'SELECT title FROM books'
-              },
-              {
-                'title': 'Sell all',
-                'description': 'Remove all data for sale',
-                'code': 'DELETE * FROM sales'
-              }
-            ]
-          };
+          this.schema = SchemaTempate;
         });
   }
 
@@ -229,8 +346,8 @@ class Application {
   }
 
   render_entity =
-      function(entity_title) {
-    let main_container = createEntitySpace(this.schema, entity_title);
+      async function(entity_title) {
+    let main_container = await createEntitySpace(this.schema, entity_title);
     this.frame.innerText = '';
     this.frame.appendChild(main_container);
     this.prev_state.push([this.render_entity, entity_title]);

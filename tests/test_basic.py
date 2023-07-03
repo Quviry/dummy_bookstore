@@ -30,8 +30,9 @@ async def test_schema(service_client):
 
 
 @pytest.mark.parametrize(
-    ('entity'), ['books', 'authors', 'addresses', 'cycles', 'genres', 'positions',
-                 'serias', 'customers', 'employees', 'orders', 'publishers', 'warehouses']
+    ('entity'), ['books', 'authors', 'addresses', 'cycles', 'genres',
+                 'positions', 'serias', 'customers', 'employees', 'orders',
+                 'publishers', 'warehouses']
 )
 async def test_entity(service_client, entity):
     response = await service_client.get(f'/api/entity/{entity}')

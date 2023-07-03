@@ -40,7 +40,7 @@ formats::json::Value View::HandleRequestJsonThrow(
   int64_t offset;
 
   if (request.HasArg("page")) {
-    offset = std::stoi(request.GetArg("page")) * kPageLimit + 1;
+    offset = std::stoi(request.GetArg("page")) * kPageLimit;
   } else {
     offset = 0;
   }
@@ -69,6 +69,7 @@ formats::json::Value View::HandleRequestJsonThrow(
     }
     result["data"].PushBack(line.ExtractValue());
   }
+  result["code"] = "Ok";
   return result.ExtractValue();
 }
 }  // namespace handlers::api::entity::list::get

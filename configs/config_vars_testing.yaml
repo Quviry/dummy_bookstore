@@ -8,3 +8,5 @@ server-port: 8080
 
 # dummy_bookstore_book_shop is the service name + _ + filename of the book_shop.sql
 dbconnection: 'postgresql://testsuite@localhost:15433/dummy_bookstore_book_shop'
+
+static-path: '/var/www' # /home/quviry/development

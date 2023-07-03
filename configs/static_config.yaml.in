@@ -58,7 +58,7 @@ components_manager:
             url_trailing_slash: strict-match
         
         fs-cache-static:
-            dir: @CMAKE_CURRENT_SOURCE_DIR@
+            dir: $static-path
             update-period: 1
 
         handler-static:

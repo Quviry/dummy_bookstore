@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS book_shop.books (
 
 CREATE TABLE IF NOT EXISTS book_shop.genres (
  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
- title TEXT NOT NULL,
+ title TEXT NOT NULL UNIQUE,
  description TEXT
 );
 
@@ -71,20 +71,21 @@ CREATE TABLE IF NOT EXISTS book_shop.publishers (
 CREATE TABLE IF NOT EXISTS book_shop.serias (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   publisher_id UUID,
-  title TEXT
+  title TEXT,
+  description TEXT
 );
 
 CREATE TABLE IF NOT EXISTS book_shop.coutries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  code CHAR(3),
-  name TEXT
+  code CHAR(3) UNIQUE,
+  name TEXT UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS book_shop.limitations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   country_id UUID,
   book_id UUID NOT NULL,
-  rating integer,
+  rating integer CHECK (rating > 0),
   extra TEXT
 );
 
@@ -158,6 +159,7 @@ CREATE TABLE IF NOT EXISTS book_shop.orders(
 
 CREATE TABLE IF NOT EXISTS book_shop.order_lines(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  position_id UUID NOT NULL,
   order_id UUID NOT NULL,
   quantity INTEGER,
   itemprice MONEY
@@ -191,20 +193,155 @@ CREATE TYPE book_shop.schema_container_type AS (
 -- relations
 
 
--- data COMMENT
-insert INTO book_shop.genres (title) VALUES ('horror');
-insert INTO book_shop.publishers (title, phone, address) VALUES ('Horror house', '+88005553535', 'High road, Low Street, 7b');
+ALTER TABLE book_shop.authorities
+ADD FOREIGN KEY (author_id)
+    REFERENCES book_shop.authors (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+  
+ALTER TABLE book_shop.authorities
+ADD FOREIGN KEY (book_id)
+    REFERENCES book_shop.books (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
 
-INSERT INTO book_shop.books (
-  title,
-  main_genre_id,
-  publisher_id,
-  published_at,
-  produced_at
-) VALUES (
-  'Nice History',
-  (SELECT id FROM book_shop.genres LIMIT 1),
-  (SELECT id FROM book_shop.publishers LIMIT 1),
-  '10-10-2000',
-  '10-10-2000'
-);
+ALTER TABLE book_shop.cycles
+ADD FOREIGN KEY (author_id)
+    REFERENCES book_shop.authors (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.books
+ADD FOREIGN KEY (cicle_id)
+    REFERENCES book_shop.cycles (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.books
+ADD FOREIGN KEY (seria_id)
+    REFERENCES book_shop.serias (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.serias
+ADD FOREIGN KEY (publisher_id)
+    REFERENCES book_shop.publishers (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.books
+ADD FOREIGN KEY (publisher_id)
+    REFERENCES book_shop.publishers (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+
+ALTER TABLE book_shop.books
+ADD FOREIGN KEY (main_genre_id)
+    REFERENCES book_shop.genres (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.genred
+ADD FOREIGN KEY (genre_id)
+    REFERENCES book_shop.genres (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.genred
+ADD FOREIGN KEY (book_id)
+    REFERENCES book_shop.books (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.limitations
+ADD FOREIGN KEY (country_id)
+    REFERENCES book_shop.coutries (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.limitations
+ADD FOREIGN KEY (book_id)
+    REFERENCES book_shop.books (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.positions
+ADD FOREIGN KEY (book_id)
+    REFERENCES book_shop.books (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.positions
+ADD FOREIGN KEY (stored_in)
+    REFERENCES book_shop.warehouses (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.order_lines
+ADD FOREIGN KEY (position_id)
+    REFERENCES book_shop.books (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.order_lines
+ADD FOREIGN KEY (order_id)
+    REFERENCES book_shop.orders (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.orders_history
+ADD FOREIGN KEY (order_id)
+    REFERENCES book_shop.orders (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.orders
+ADD FOREIGN KEY (customer_id)
+    REFERENCES book_shop.customers (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.orders
+ADD FOREIGN KEY (delivery_adress_id)
+    REFERENCES book_shop.addresses (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.orders
+ADD FOREIGN KEY (saler_id)
+    REFERENCES book_shop.employees (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.customers
+ADD FOREIGN KEY (person_id)
+    REFERENCES book_shop.people (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.customers
+ADD FOREIGN KEY (address_id)
+    REFERENCES book_shop.addresses (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.employees
+ADD FOREIGN KEY (person_id)
+    REFERENCES book_shop.people (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.employees
+ADD FOREIGN KEY (store_id)
+    REFERENCES book_shop.warehouses (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+ALTER TABLE book_shop.warehouses
+ADD FOREIGN KEY (address_id)
+    REFERENCES book_shop.addresses (id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+-- data COMMENT

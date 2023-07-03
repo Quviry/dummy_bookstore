@@ -7,3 +7,5 @@ is_testing: false
 server-port: 8080
 
 dbconnection: 'postgresql://dummy_bookstore_user:password@localhost:5432/dummy_bookstore_book_shop'
+
+static-path: '@CMAKE_CURRENT_SOURCE_DIR@'
