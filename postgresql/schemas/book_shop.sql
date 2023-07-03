@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS book_shop.serias (
   description TEXT
 );
 
-CREATE TABLE IF NOT EXISTS book_shop.coutries (
+CREATE TABLE IF NOT EXISTS book_shop.countries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code CHAR(3) UNIQUE,
   name TEXT UNIQUE
@@ -256,7 +256,7 @@ ADD FOREIGN KEY (book_id)
 
 ALTER TABLE book_shop.limitations
 ADD FOREIGN KEY (country_id)
-    REFERENCES book_shop.coutries (id)
+    REFERENCES book_shop.countries (id)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
 
