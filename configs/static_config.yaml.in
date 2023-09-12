@@ -50,6 +50,7 @@ components_manager:
             path: /tests/{action}
             method: POST
             task_processor: main-task-processor
+        
         handler-ping:
             path: /ping
             method: GET
@@ -81,11 +82,26 @@ components_manager:
             path: /api/schema
             method: GET
             task_processor: main-task-processor
+        
+        handler-create-api-entity:
+            path: /api/entity/{name}/new
+            method: POST
+            task_processor: main-task-processor
+        
+        handler-delete-api-entity:
+            path: /api/entity/{name}/{id}
+            method: DELETE
+            task_processor: main-task-processor
+
+        handler-get-api-entity:
+            path: /api/entity/{name}/{id}
+            method: GET
+            task_processor: main-task-processor
 
         handler-get-api-entity-list:
             path: /api/entity/{name}
             method: GET
-            task_processor: main-task-processor
+            task_processor: main-task-processor        
 
         postgres-db:
             dbconnection: $dbconnection

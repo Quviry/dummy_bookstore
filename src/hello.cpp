@@ -71,6 +71,6 @@ void AppendHello(userver::components::ComponentList& component_list) {
   component_list.Append<Hello>();
   component_list.Append<userver::components::Postgres>("postgres-db");
   component_list.Append<userver::clients::dns::Component>();
-}
+} 
 
 }  // namespace dummy_bookstore

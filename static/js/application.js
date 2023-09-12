@@ -59,7 +59,7 @@ const SchemaTempate = {
   ]
 };
 
-const StandartWidth = ['col-8', 'mx-auto']; 
+const StandartWidth = ['col-8', 'mx-auto'];
 
 
 function createTopBar() {
@@ -94,7 +94,7 @@ async function getEntityList(entity, page) {
 }
 
 
-function createEntityListContainer(data) {
+function createEntityListContainer(data, entity) {
   let container = document.createElement('tr');
 
   let id_container = document.createElement('td');
@@ -104,28 +104,59 @@ function createEntityListContainer(data) {
   let actions_container = document.createElement('td');
   actions_container.classList.add('text-end');
 
-  let edit_button = document.createElement('button');
-  edit_button.classList.add('btn', 'btn-secondary', 'btn-sm', 'ms-4');
-  edit_button.textContent = 'Edit';
+  // let edit_button = document.createElement('button');
+  // edit_button.classList.add('btn', 'btn-secondary', 'btn-sm', 'ms-4');
+  // edit_button.textContent = 'Edit';
 
   let delete_button = document.createElement('button');
   delete_button.classList.add('btn', 'btn-danger', 'btn-sm', 'ms-4');
   delete_button.textContent = 'Delete';
 
-  delete_button.onclick = (event) => {
+  delete_button.onclick = async (event) => {
     event.stopPropagation();
-    alert('wannadelete');
+    await fetch(`api/entity/${entity}/${data.id}/`, {
+      method: 'DELETE'
+    }).then((response) => response.json().then(data => {
+      if (data.code == 'Ok') {
+        event.target.parentNode.parentNode.remove();
+      } else {
+        (new Application).render_error(data.code);
+      }
+    }));
   };
 
-  actions_container.appendChild(edit_button);
+  // actions_container.appendChild(edit_button);
   actions_container.appendChild(delete_button);
 
   container.appendChild(id_container);
   container.appendChild(human_readable_container);
   container.appendChild(actions_container);
 
-  container.onclick = () => {
-    alert(data.id);
+  container.onclick = async (event) => {
+    event.stopPropagation();
+    await fetch(`api/entity/${entity}/${data.id}/`, {
+      method: 'GET'
+    }).then((response) => response.json().then(data => {
+      if (data.code == 'Ok') {
+        const options = {};
+        const ent = data.data[0];
+        document.getElementById('staticBackdropLabel').textContent =
+            entity + ': ' + ent.id;
+        let bod = document.getElementById('staticBackdropContent');
+        bod.textContent = '';
+        for (var key in ent) {
+          let c = document.createElement('div');
+          c.classList.add('card', 'card-body', 'mb-3');
+          c.textContent = key + ': ' + ent[key]
+          bod.appendChild(c);
+        }
+        const myModalAlternative =
+            new bootstrap.Modal('#staticBackdrop', options);
+        myModalAlternative.show();
+      } else {
+        (new Application).render_error(data.code);
+      }
+    }));
   };
 
 
@@ -160,10 +191,39 @@ async function createEntitySection(entity, page = 0) {
 
   let tbody = document.createElement('tbody');
   for (const item of data.data) {
-    tbody.appendChild(createEntityListContainer(item));
+    tbody.appendChild(createEntityListContainer(item, entity));
   }
   table.appendChild(tbody);
+
+  let next_link = document.createElement('button');
+  next_link.innerText = '>';
+  next_link.onclick = async () => {
+    const section = await createEntitySection(entity, page + 1);
+    container.parentNode.appendChild(section);
+    container.remove();
+  };
+
   container.appendChild(table);
+
+  if (page > 0) {
+    let prev_link = document.createElement('button');
+    prev_link.innerText = '<';
+    prev_link.onclick = async () => {
+      const section = await createEntitySection(entity, page - 1);
+      container.parentNode.appendChild(section);
+      container.remove();
+    };
+    container.appendChild(prev_link);
+  }
+
+  let pager = document.createElement('p');
+  pager.innerText = 'Page: ' + (page + 1);
+  container.appendChild(pager);
+
+  if (data.data.length == 100) {
+    container.appendChild(next_link);
+  }
+
 
   return container;
 }
@@ -187,7 +247,7 @@ async function createEntitySpace(schema, entity_title) {
   container.appendChild(entity_name);
 
   let entity_counter = document.createElement('h6');
-  entity_counter.classList.add('text-end',  ...StandartWidth);
+  entity_counter.classList.add('text-end', ...StandartWidth);
   entity_counter.textContent = 'Rows number: ' + entity_data.rows_number;
   container.appendChild(entity_counter);
 

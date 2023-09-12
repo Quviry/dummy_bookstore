@@ -10,6 +10,10 @@
 #include <views/get/view.hpp>
 #include <views/api/schema/get/view.hpp>
 #include <views/api/entity/list/get/view.hpp>
+#include <views/api/entity/get/view.hpp>
+#include <views/api/entity/delete/view.hpp>
+#include <views/api/entity/post/view.hpp>
+
 
 int main(int argc, char* argv[]) {
   auto component_list = userver::components::MinimalServerComponentList()
@@ -21,7 +25,10 @@ int main(int argc, char* argv[]) {
                             .Append<userver::server::handlers::HttpHandlerStatic>()
                             .Append<handlers::get::View>()
                             .Append<handlers::api::schema::get::View>()
-                            .Append<handlers::api::entity::list::get::View>();
+                            .Append<handlers::api::entity::list::get::View>()
+                            .Append<handlers::api::entity::post::View>()
+                            .Append<handlers::api::entity::get::View>()
+                            .Append<handlers::api::entity::del::View>();
 
   dummy_bookstore::AppendHello(component_list);
 
