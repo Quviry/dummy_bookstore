@@ -228,6 +228,26 @@ async function createEntitySection(entity, page = 0) {
   return container;
 }
 
+async function runCreation(event) {
+  event.stopPropagation();
+  const entity = document.getElementById('EntityLabel').textContent.toLowerCase();
+  const data = (new Application).schema.tables.filter((v)=>{return v.title == entity})[0];
+  const options = {};
+  document.getElementById('staticBackdropLabel').textContent =
+      entity + ': Creation';
+  let bod = document.getElementById('staticBackdropContent');
+  bod.textContent = '';
+  for (var column of data.columns){
+    let inp = document.createElement('input');
+    inp.classList.add('form-control');
+    inp.value = column.title;
+    inp.required = !column.nullable;
+    bod.appendChild(inp);
+  }
+  const myModalAlternative = new bootstrap.Modal('#staticBackdrop', options);
+  myModalAlternative.show();
+}
+
 async function createEntitySpace(schema, entity_title) {
   for (let entity of schema.tables) {
     if (entity.title == entity_title) {
@@ -243,8 +263,16 @@ async function createEntitySpace(schema, entity_title) {
   let entity_name = document.createElement('h2');
   entity_name.textContent =
       entity_title.charAt(0).toUpperCase() + entity_title.slice(1);
+  entity_name.id = 'EntityLabel';
   entity_name.classList.add('my-3');
   container.appendChild(entity_name);
+
+  let new_btn = document.createElement('button');
+  new_btn.classList.add(
+      'ms-auto', 'w-auto', 'btn', 'btn-secondary', ...StandartWidth);
+  new_btn.onclick = runCreation;
+  new_btn.textContent = '+ New';
+  container.appendChild(new_btn);
 
   let entity_counter = document.createElement('h6');
   entity_counter.classList.add('text-end', ...StandartWidth);
