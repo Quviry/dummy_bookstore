@@ -230,21 +230,67 @@ async function createEntitySection(entity, page = 0) {
 
 async function runCreation(event) {
   event.stopPropagation();
+  const myModalAlternative = new bootstrap.Modal('#staticBackdrop', {});
   const entity = document.getElementById('EntityLabel').textContent.toLowerCase();
   const data = (new Application).schema.tables.filter((v)=>{return v.title == entity})[0];
-  const options = {};
   document.getElementById('staticBackdropLabel').textContent =
       entity + ': Creation';
   let bod = document.getElementById('staticBackdropContent');
   bod.textContent = '';
+  let form = document.createElement('form');
+  form.action = `api/entity/${entity}/new`;
+  form.method = 'POST';
+
   for (var column of data.columns){
+    let label = document.createElement('label');
+    label.textContent = column.title;
+    if (column.title != 'id' && !column.nullable) label.textContent += " (required)";
+    if (column.title == 'id') label.textContent += ' (leave empty for new)';
+    label.setAttribute('for', column.title + "_id");
+    label.classList.add('form-label');
+
     let inp = document.createElement('input');
     inp.classList.add('form-control');
-    inp.value = column.title;
-    inp.required = !column.nullable;
-    bod.appendChild(inp);
+    if (column.title != 'id') inp.required = !column.nullable;
+    inp.setAttribute('name', column.title);
+    inp.setAttribute('id', column.title + "_id");
+    if (column.datatype == 'uuid'){
+      inp.setAttribute('pattern', '^[0-9A-Fa-f]{8}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{12}$');
+    }
+
+    form.appendChild(label);
+    form.appendChild(inp);
   }
-  const myModalAlternative = new bootstrap.Modal('#staticBackdrop', options);
+
+  let submit = document.createElement('input');
+  submit.type = 'submit';
+  submit.value = "Upsert!";
+  submit.name = "submit_btn";
+  submit.classList.add('btn', 'btn-primary', 'mt-2');
+  form.appendChild(submit);
+
+  form.onsubmit = (event) => {
+    var xhr = new XMLHttpRequest();
+    var formData = new FormData(form);
+    //open the request
+    xhr.open('POST', form.action);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    //send the form data
+    xhr.send(JSON.stringify(Object.fromEntries(formData)));
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            form.reset(); //reset form after AJAX success or do something else
+            myModalAlternative.hide();
+        }
+    }
+    //Fail the onsubmit to avoid page refresh.
+    return false; 
+  }
+
+  bod.appendChild(form);
+  
   myModalAlternative.show();
 }
 

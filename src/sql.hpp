@@ -40,6 +40,15 @@ const storages::postgres::Query kGetEntities{
 FROM book_shop.$1)",
     userver::storages::postgres::Query::Name{"get_entities"}};
 
+const storages::postgres::Query kUpsertAuthors{
+    R"(INSERT INTO book_shop.authors (id, name, bio)
+VALUES ($1, $2, $3)
+ON CONFLICT (id) DO UPDATE
+SET 
+    name=EXCLUDED.name,
+    bio=EXCLUDED.bio)",
+    userver::storages::postgres::Query::Name{"upsert_authors"}};
+
 const storages::postgres::Query kGetSerias{
     R"(SELECT id,
     title
